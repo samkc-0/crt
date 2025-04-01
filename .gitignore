@@ -1,0 +1,35 @@
+# binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# build dir
+/bin/
+/build/
+/dist/
+
+# go stuff
+vendor/
+*.mod
+*.sum
+
+# ide/editor trash
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# coverage/test logs
+coverage.*
+*.coverprofile
+*.log
+
+# image files
+*.png
+*.gif
+*.jpg
+*.jpeg
