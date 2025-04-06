@@ -78,48 +78,35 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("✅ image loaded successfully: %s\n", path)
-	fmt.Printf("🖼️ image size: %v\n", img.Bounds())
+	// fmt.Printf("✅ image loaded successfully: %s\n", path)
+	// fmt.Printf("🖼️ image size: %v\n", img.Bounds())
 	termW, termH, err := term.GetSize(0)
-	termH -= 5
 	if err != nil {
 		fmt.Println("could not get terminal size.")
 		os.Exit(1)
 	}
-
-	fmt.Printf("📏 terminal size: %d columns x %d termH\n", termW, termH)
+	termH -= 1
+	// fmt.Printf("📏 terminal size: %d columns x %d termH\n", termW, termH)
 	bounds := img.Bounds()
 	imgW := bounds.Dx()
 	imgH := bounds.Dy()
 
-	// use terminal width as number of columns
-	// aspectRatio := 0.5 // tweak based on terminal
-	// aspect = h / w
-	// if the aspect > 1 then it's portrait.
-	// if the aspect 0 <= x <= 1 then it is landscape
-	// so the aspect is basically "how potrait is this image"
-	// so when the image is more portrait than the terminal, pad the sides.
-	// when it's less portrait than the terminal, padd the top and bottom.
 	tAspect := getAspectRatio(termH, termW)
 	pAspect := getAspectRatio(imgW, imgH)
-	// pad left and right
 	imgWAdjusted := termW
 	imgHAdjusted := int(float64(imgWAdjusted) / pAspect)
-	// if the image is more potrait than the terminal, stretch/shrink img to height
 	if tAspect <= pAspect {
 		imgHAdjusted = termH
-		imgWAdjusted = int(float64(imgHAdjusted) * pAspect)
+		imgWAdjusted = 2 * int(float64(imgHAdjusted)*pAspect)
 	}
-	imgWAdjusted *= 2
-	actualAspect := float64(imgWAdjusted) / float64(imgHAdjusted)
 	scaleX := float64(imgW) / float64(imgWAdjusted)
 	scaleY := float64(imgH) / float64(imgHAdjusted)
-	fmt.Printf("📐 resizing %dx%d (aspect %f) image to %dx%d (aspect %f)...", imgW, imgH, pAspect, imgHAdjusted, imgWAdjusted, actualAspect)
+
 	for y := 0; y < imgHAdjusted; y++ {
 		for x := 0; x < imgWAdjusted; x++ {
 			imgX := int(float64(x) * scaleX)
 			imgY := int(float64(y) * scaleY)
-
+			imgYb := imgY + int(scaleY)/2
 			if imgX >= imgW || imgY >= imgH {
 				continue
 			}
@@ -129,7 +116,17 @@ func main() {
 			g8 := g >> 8
 			b8 := b >> 8
 
-			fmt.Printf("\x1b[48;2;%d;%d;%dm ", r8, g8, b8)
+			if imgYb >= imgH {
+				continue
+			}
+
+			bg_r, bg_g, bg_b, _ := img.At(bounds.Min.X+imgX, bounds.Min.Y+imgYb).RGBA()
+			bg_r8 := bg_r >> 8
+			bg_g8 := bg_g >> 8
+			bg_b8 := bg_b >> 8
+
+			char := '▀'
+			fmt.Printf("\x1b[38;2;%d;%d;%dm\x1b[48;2;%d;%d;%dm%c", r8, g8, b8, bg_r8, bg_g8, bg_b8, char)
 		}
 		fmt.Print("\x1b[0m\n")
 	}
