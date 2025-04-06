@@ -44,11 +44,17 @@ func main() {
 	// define a flag to get the image path
 	imagePath := flag.String("image", "", "path to the image file")
 	imagePathShort := flag.String("i", "", "alias for -image")
+	customChar := flag.String("c", "", "custom character. default: '▀'")
 	flag.Parse()
 
 	path := *imagePath
 	if path == "" {
 		path = *imagePathShort
+	}
+
+	char := *customChar
+	if char == "" {
+		char = "▀"
 	}
 
 	// if no image path was provided, show usage and exit
@@ -125,8 +131,7 @@ func main() {
 			bg_g8 := bg_g >> 8
 			bg_b8 := bg_b >> 8
 
-			char := '▀'
-			fmt.Printf("\x1b[38;2;%d;%d;%dm\x1b[48;2;%d;%d;%dm%c", r8, g8, b8, bg_r8, bg_g8, bg_b8, char)
+			fmt.Printf("\x1b[38;2;%d;%d;%dm\x1b[48;2;%d;%d;%dm%s", r8, g8, b8, bg_r8, bg_g8, bg_b8, char)
 		}
 		fmt.Print("\x1b[0m\n")
 	}
